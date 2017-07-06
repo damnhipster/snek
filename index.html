@@ -78,9 +78,9 @@ window.onload = function() {
 
   window.setInterval(game, 1000/15);
 
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
   tileHeight = tileWidth = 20;
+  canvas.width = Math.floor(window.innerWidth / tileWidth) * tileWidth;
+  canvas.height = Math.floor(window.innerHeight / tileHeight) * tileHeight;
   gridSizeX = canvas.width/tileWidth;
   gridSizeY = canvas.height/tileHeight;
   snake = new Snake();
