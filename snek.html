@@ -1,0 +1,142 @@
+<html>
+
+  <head>
+    <title>
+      Snek
+    </title>
+  </head>
+
+  <body style="background: black;">
+    <canvas id="snek" width="400" height="400" style="border:1px solid #FFFFFF;"></canvas>
+  </body>
+
+  <script>
+window.rInterval=function(callback,delay) {
+  var dateNow=Date.now,
+    requestAnimation=window.requestAnimationFrame,
+    start=dateNow(),
+    stop,
+    intervalFunc=function() {
+      dateNow()-start<delay||(start+=delay, callback());
+      stop||requestAnimation(intervalFunc)
+    }
+  requestAnimation(intervalFunc);
+  return {
+    clear: function(){ stop=1 }
+  }
+}
+
+function Snake() {
+  this.maxLength = 5;
+  this.X = [10];
+  this.Y = [10];
+  this.directionX = 1;
+  this.directionY = 0;
+}
+
+Snake.prototype.headX = function() { return this.X.slice(-1)[0]; }
+Snake.prototype.headY = function() { return this.Y.slice(-1)[0]; }
+Snake.prototype.length = function() { return this.X.length; }
+
+Snake.prototype.move = function () {
+  this.X.push(this.X[this.X.length-1] + this.directionX);
+  this.Y.push(this.Y[this.Y.length-1] + this.directionY);
+  if(this.X.length > this.maxLength) {
+    this.X.shift();
+    this.Y.shift();
+  }
+}
+
+Snake.prototype.grow = function() {
+  this.maxLength = this.maxLength + 1;
+}
+
+function Apple(sizeX, sizeY) {
+  this.x = Math.floor(Math.random() * sizeX);
+  this.y = Math.floor(Math.random() * sizeY);
+}
+
+window.onload = function() {
+  canvas = document.getElementById('snek');
+  context = canvas.getContext('2d');
+  document.addEventListener("keydown", keyPush);
+  
+  window.setInterval(game, 1000/15);
+
+  tileHeight = tileWidth = 20;
+  gridSizeX = canvas.height/tileHeight;
+  gridSizeY = canvas.width/tileWidth;
+  apple = new Apple(gridSizeX, gridSizeY);
+  snake = new Snake();
+
+  function game() {
+    snake.move();
+    hitBoundary();
+    <!-- if(collision()) snake = new Snake(); -->
+    checkApple();
+    draw();
+  }
+
+  function checkApple() {
+    if(snake.headX() === apple.x && snake.headY() === apple.y) {
+      snake.grow();
+      apple = new Apple(gridSizeX, gridSizeY);
+    }
+  }
+
+  function hitBoundary() {
+    if(snake.headX() >= gridSizeX) snake.X[snake.X.length-1] = 0;
+    if(snake.headY() >= gridSizeY) snake.Y[snake.Y.length-1] = 0;
+    if(snake.headX() < 0) snake.X[snake.X.length-1] = gridSizeX-1;
+    if(snake.headY() < 0) snake.Y[snake.Y.length-1] = gridSizeY-1;
+  }
+
+  function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'grey';
+    for(i=0; i<snake.length(); i++) {
+      context.fillRect(tileWidth * snake.X[i], tileHeight * snake.Y[i], tileWidth, tileHeight)
+    }
+    context.fillStyle = 'lime';
+    context.fillRect(tileWidth * apple.x, tileHeight * apple.y, tileWidth, tileHeight)
+  }
+
+  function collision() {
+    const last = snake.length() - 1;
+    return snake.X.slice(0, last).includes(snake.headX())
+      && snake.Y.slice(0, last).includes(snake.headY());
+  }
+
+  function keyPush(event) {
+    switch(event.keyCode) {
+      case 37:
+        if(snake.directionX !== 1) {
+          snake.directionX = -1;
+          snake.directionY = 0;
+        }
+        break;
+      case 38:
+        if(snake.directionY !== 1) {
+          snake.directionX = 0;
+          snake.directionY = -1;
+        }
+        break;
+      case 39:
+        if(snake.directionX !== -1) {
+          snake.directionX = 1;
+          snake.directionY = 0;
+        }
+        break;
+      case 40:
+        if(snake.directionY !== -1) {
+          snake.directionX = 0;
+          snake.directionY = 1;
+        }
+        break;
+    }
+  }
+}
+
+  </script>
+
+</html>
