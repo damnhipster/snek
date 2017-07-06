@@ -34,12 +34,15 @@ window.rInterval=function(callback,delay) {
   }
 }
 
+colors = [ 'red', 'orange', 'yellow', 'fuchsia', 'lime', 'aqua', 'blue' ];
+
 function Snake() {
-  this.maxLength = 5;
+  this.maxLength = 1;
   this.X = [10];
   this.Y = [10];
   this.directionX = 1;
   this.directionY = 0;
+  this.colors = [colors.slice(-1)[0]];
 }
 
 Snake.prototype.headX = function() { return this.X.slice(-1)[0]; }
@@ -55,20 +58,23 @@ Snake.prototype.move = function () {
   }
 }
 
-Snake.prototype.grow = function() {
+Snake.prototype.eat = function(apple) {
   this.maxLength = this.maxLength + 1;
+  this.colors.push(apple.color);
 }
 
 function Apple(sizeX, sizeY) {
   this.x = Math.floor(Math.random() * sizeX);
   this.y = Math.floor(Math.random() * sizeY);
+  this.color = colors[0];
+  colors.push(colors.shift());
 }
 
 window.onload = function() {
   canvas = document.getElementById('snek');
   context = canvas.getContext('2d');
   document.addEventListener("keydown", keyPush);
-  
+
   window.setInterval(game, 1000/15);
 
   canvas.width = window.innerWidth;
@@ -76,8 +82,8 @@ window.onload = function() {
   tileHeight = tileWidth = 20;
   gridSizeX = canvas.width/tileWidth;
   gridSizeY = canvas.height/tileHeight;
-  apple = new Apple(gridSizeX, gridSizeY);
   snake = new Snake();
+  apple = new Apple(gridSizeX, gridSizeY);
 
   function game() {
     snake.move();
@@ -89,7 +95,7 @@ window.onload = function() {
 
   function checkApple() {
     if(snake.headX() === apple.x && snake.headY() === apple.y) {
-      snake.grow();
+      snake.eat(apple);
       apple = new Apple(gridSizeX, gridSizeY);
     }
   }
@@ -103,11 +109,11 @@ window.onload = function() {
 
   function draw() {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = 'grey';
     for(i=0; i<snake.length(); i++) {
+      context.fillStyle = snake.colors[i];
       context.fillRect(tileWidth * snake.X[i], tileHeight * snake.Y[i], tileWidth, tileHeight)
     }
-    context.fillStyle = 'lime';
+    context.fillStyle = apple.color;
     context.fillRect(tileWidth * apple.x, tileHeight * apple.y, tileWidth, tileHeight)
   }
 
